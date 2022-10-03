@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>验证码</title>
+</head>
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .wrap {
+    width: 310px;
+    height: 40px;
+    margin: 400px auto;
+  }
+
+  #yzm {
+    width: 200px;
+    height: 40px;
+    outline: none;
+    font-size: 20px;
+    padding-left: 10px;
+    border: 1px solid black;
+  }
+
+  #yzm:focus {
+    border-color: orange;
+  }
+
+  .canvas {
+    float: right;
+  }
+
+  .submit {
+    margin-top: 10px;
+    width: 80px;
+    height: 40px;
+    user-select: none;
+  }
+
+  .msgWrap {
+    height: 24px;
+  }
+
+  .msg {
+    color: #f00;
+    font-size: 16px;
+    display: none;
+  }
+</style>
+
+<body>
+  <div class="wrap">
+    <div class="msgWrap"><span class="msg">输入错误，请重新输入</span></div>
+    <input id=yzm type="text">
+    <div class="canvas">
+      <canvas></canvas>
+    </div>
+    <button class="submit">提 交</button>
+  </div>
+  <script>
+    var submit = document.querySelector(".submit");
+    var msg = document.querySelector(".msg");
+    var yzm = document.querySelector("#yzm");
+    // 获取canvas对象，这一行和下一行固定写法，必须要写
+    var canvas = document.querySelector("canvas");
+    // 获取上下文
+    var ctx = canvas.getContext('2d');
+    // 画布宽
+    canvas.width = 100;
+    // 画布高
+    canvas.height = 40;
+    // 验证码结果
+    var checkTxt = "";
+
+    // 点击验证码，刷新
+    canvas.onclick = function () {
+      checkTxt = "";
+      update();
+    }
+
+    // 提交按钮事件
+    submit.onclick = function () {
+      if (checkTxt === yzm.value) {
+        msg.style.display = "none";
+        alert("OK!");
+      } else {
+        yzm.value = "";
+        msg.style.display = "block";
+        checkTxt = "";
+      }
+    }
+
+    // 数字数组
+    var numArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    
+    function update() {
+      ctx.beginPath(); // 开始画线
+      // 矩形填充颜色
+      ctx.fillStyle = "rgb(" + randomNumber(180, 240) + "," + randomNumber(180, 240) + "," + randomNumber(180, 240) + ")";
+      // 画个举矩形，和画布同宽高
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.closePath(); // 结束画线
+      ctx.fill(); // 填充到画布
+      // 字体基线在字体垂直居中上
+      ctx.textBaseline = "middle";
+      // 生成验证码，下面两个for循环，就是核心代码
+      for (var i = 0; i < 4; i++) {
+        // 随机一个数字
+        var text = numArr[randomNumber(0, numArr.length)];
+        // 获取验证码
+        checkTxt += text;
+        // 数字验证码颜色
+        ctx.fillStyle = "rgb(" + randomNumber(0, 255) + "," + randomNumber(0, 255) + "," + randomNumber(0, 255) + ")";
+        // 字体大小
+        var fsize = randomNumber(canvas.height / 2, canvas.height);
+        // 设置字体大小及字体
+        ctx.font = fsize + "px serif";
+        // 画数字
+        ctx.save();
+        // 移动坐标系
+        ctx.translate(15 + 20 * i, canvas.height / 2);
+        // 字体旋转弧度
+        var rad = randomNumber(-30, 30) * Math.PI / 180;
+        // 旋转坐标系
+        ctx.rotate(rad);
+        // 填充数字,因为移动了坐标系，所以在坐标原点画就可以
+        ctx.fillText(text, 0, 0);
+        // 恢复坐标系，之前画的不受任何影响，ctx.save() 和 ctx.restore() 是一对，要配合使用
+        ctx.restore();
+      }
+
+      // 干扰线
+      for (var j = 0; j < 4; j++) {
+        // 干扰线颜色
+        ctx.strokeStyle = "rgb(" + randomNumber(0, 255) + "," + randomNumber(0, 255) + "," + randomNumber(0, 255) + ")";
+        ctx.beginPath();
+        // 就想象成笔尖，这个就是笔尖的坐标
+        ctx.moveTo(randomNumber(0, canvas.width), randomNumber(0, canvas.height));
+        // 笔尖要到的地方的坐标
+        ctx.lineTo(randomNumber(0, canvas.width), randomNumber(0, canvas.height));
+        // 画线，没有这个画不出来
+        ctx.stroke();
+      }
+    }
+
+    // 调用
+    update();
+
+    // 获取随机数字
+    function randomNumber(min, max) {
+      return parseInt(Math.random() * (max - min) + min);
+    }
+  </script>
+</body>
+
+</html>
