@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彩虹屁</title>
+</head>
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+    }
+
+    canvas {
+        border: 1px solid black;
+        overflow: hidden;
+        background: #000;
+    }
+</style>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        // 获取canvas对象
+        var canvas = document.querySelector("#canvas");
+        // 设置canvas画布宽度
+        canvas.width = document.documentElement.clientWidth;
+        // 设置canvas画布长度
+        canvas.height = document.documentElement.clientHeight;
+        // 获取canvas上下文
+        var ctx = canvas.getContext('2d');
+
+        // 彩球类
+        function Ball(x, y) {
+            this.x = x; // 圆心坐标x
+            this.y = y; // 圆心坐标y
+            this.r = 30; // 半径
+            // 彩球颜色
+            this.color = "rgb(" + parseInt(Math.random() * 256) + "," + parseInt(Math.random() * 256) + "," + parseInt(Math.random() * 256) + ")";
+            this.dx = parseInt(Math.random() * 8) - 4; // 小球x轴偏移量 这个数值可以自己调整，用正弦应该能好一些
+            this.dy = parseInt(Math.random() * 8) - 4; // 小球y轴偏移量 这个数值可以自己调整，用正弦应该能好一些
+            ballsArr.push(this); // 把自己放入数组内
+        }
+
+        // 生成小球
+        Ball.prototype.render = function () {
+            ctx.beginPath(); // 开始画线
+            ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI, true); // 画小球
+            ctx.closePath(); // 结束画线
+            ctx.fillStyle = this.color; // 小球填充颜色
+            ctx.fill(); // 填充颜色
+        }
+
+        // 更新小球位置
+        Ball.prototype.update = function () {
+            this.x += this.dx;
+            this.y += this.dy;
+            this.r -= 0.6;
+            // 当小球半径小于零时，从数组中删除小球
+            if (this.r < 0) {
+                this.godie();
+            }
+        }
+
+        // 删除小球
+        Ball.prototype.godie = function () {
+            for (var i = 0; i < ballsArr.length; i++) {
+                if (ballsArr[i] === this) {
+                    ballsArr.splice(i, 1);
+                }
+            }
+        }
+
+        // 小球数组
+        var ballsArr = [];
+
+        // 监听事件
+        canvas.onmousemove = function (event) {
+            // 鼠标每移动一下就生成一个小球对象，并存入了数组内
+            new Ball(event.clientX, event.clientY);
+        }
+
+        // 定时器
+        setInterval(function () {
+            // 清屏，这个方法就是把之前的小球全部清除
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < ballsArr.length; i++) {
+                // 更新每个球的状态
+                ballsArr[i].update();
+                // 生成小球
+                // ballsArr[i] && ballsArr[i].render(); 意思是 ballsArr[i] 如果不存在，后面的 ballsArr[i].render() 就不会执行
+                ballsArr[i] && ballsArr[i].render();
+            }
+        }, 20);
+    </script>
+</body>
+
+</html>
